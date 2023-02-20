@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from instruction import Instruction, Connect
+from guacamole.instruction import Instruction, Connect
 
 logger = logging
 
@@ -33,8 +33,7 @@ class GuacamoleClient:
     async def read(self):
         index = self.buffer.find(Instruction.INSTRUCTION_DELIMITER)
         while index == -1:
-            to_read = self.READ_BUFFER_SIZE - len(self.buffer)
-            raw = await self.reader.read(to_read)
+            raw = await self.reader.read(self.READ_BUFFER_SIZE)
             self.buffer += raw.decode()
             index = self.buffer.find(Instruction.INSTRUCTION_DELIMITER)
 
@@ -60,7 +59,7 @@ class GuacamoleClient:
         await self.send_batch(
             [
                 Instruction("select", self.config["protocol"]),
-                Instruction("size", self.config["width"], self.config["length"]),
+                Instruction("size", *self.config["size"]),
                 Instruction("audio", *self.config["audio"]),
                 Instruction("video", *self.config["video"]),
                 Instruction("image", *self.config["image"]),

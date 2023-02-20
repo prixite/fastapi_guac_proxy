@@ -1,3 +1,3 @@
-from client import GuacamoleClient
+from guacamole.client import GuacamoleClient
 
 __all__ = ["GuacamoleClient"]
