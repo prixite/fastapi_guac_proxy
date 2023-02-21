@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from fastapi import FastAPI, Request, WebSocket, BackgroundTasks, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -26,34 +26,39 @@ async def guacd_to_client(websocket: WebSocket, client: GuacamoleClient):
     while True:
         instruction = await client.read()
         if instruction.error:
-            logging.error(
-                f"{instruction.short_description}-{instruction.description}"
-            )
+            logging.error(f"{instruction.short_description}-{instruction.description}")
         await websocket.send_text(str(instruction))
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, background_tasks: BackgroundTasks):
+@app.websocket("/websocket/")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    guacd_host: str,
+    guacd_port: str,
+    protocol: str,
+    remote_host: str,
+    remote_port: str,
+    username: str,
+    password: str,
+):
     await websocket.accept(subprotocol="guacamole")
     client = GuacamoleClient(
-        "74.207.234.105",
-        4822,
+        guacd_host,
+        guacd_port,
         {
-            "protocol": "vnc",
-            "size": [1024, 768, 96],
+            "protocol": protocol,
+            "size": [2560, 1600, 227],
             "audio": [],
             "video": [],
             "image": [],
             "args": {
-                "hostname": "2.tcp.ngrok.io",
-                "port": 10261,
-                "username": "Remote",
-                "password": "",
+                "hostname": remote_host,
+                "port": remote_port,
+                "username": username,
+                "password": password,
             },
         },
-        debug=True,
     )
-
     await client.connect()
     await client.handshake()
 

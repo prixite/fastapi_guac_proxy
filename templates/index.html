@@ -6,7 +6,7 @@
 		<h1>Guacamole Monitor</h1>
 		<div id="display"></div>
 		<script type="application/javascript">
-			const webSocketFullUrl = "ws://localhost:8000/ws";
+			const webSocketFullUrl = "ws://localhost:8000/websocket/";
 			var tunnel = new Guacamole.WebSocketTunnel(webSocketFullUrl)
 			var guac = new Guacamole.Client(tunnel);
 
