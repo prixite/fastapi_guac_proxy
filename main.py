@@ -39,14 +39,16 @@ async def websocket_endpoint(websocket: WebSocket, background_tasks: BackgroundT
         "74.207.234.105",
         4822,
         {
-            "protocol": "ssh",
+            "protocol": "vnc",
             "size": [1024, 768, 96],
             "audio": [],
             "video": [],
             "image": [],
             "args": {
                 "hostname": "2.tcp.ngrok.io",
-                "port": 10220,
+                "port": 10261,
+                "username": "Remote",
+                "password": "",
             },
         },
         debug=True,
