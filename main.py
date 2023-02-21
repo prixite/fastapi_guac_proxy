@@ -1,5 +1,6 @@
+import logging
 import asyncio
-from fastapi import FastAPI, Request, WebSocket, BackgroundTasks
+from fastapi import FastAPI, Request, WebSocket, BackgroundTasks, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -21,13 +22,13 @@ def get(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-async def socket_to_client(websocket: WebSocket, client: GuacamoleClient):
-    await client.connect()
-    await client.handshake()
+async def guacd_to_client(websocket: WebSocket, client: GuacamoleClient):
     while True:
         instruction = await client.read()
         if instruction.error:
-            print("ERROR", instruction.short_description, instruction.description)
+            logging.error(
+                f"{instruction.short_description}-{instruction.description}"
+            )
         await websocket.send_text(str(instruction))
 
 
@@ -48,12 +49,19 @@ async def websocket_endpoint(websocket: WebSocket, background_tasks: BackgroundT
                 "port": 10220,
             },
         },
-        debug=True
+        debug=True,
     )
 
-    asyncio.get_event_loop().create_task(socket_to_client(websocket, client))
+    await client.connect()
+    await client.handshake()
 
-    while True:
-        data = await websocket.receive_text()
-        instruction = Instruction.from_string(data)
-        await client.send(str(instruction))
+    task = asyncio.get_event_loop().create_task(guacd_to_client(websocket, client))
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            instruction = Instruction.from_string(data)
+            await client.send(str(instruction))
+    except WebSocketDisconnect:
+        task.cancel()
+        await client.close()

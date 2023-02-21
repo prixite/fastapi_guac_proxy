@@ -46,7 +46,7 @@ class GuacamoleClient:
 
     async def close(self):
         self.writer.close()
-        await self.writer.wait_closed()
+        self.reader.feed_eof()
         logger.info("Connection closed")
 
     async def send(self, instruction):
