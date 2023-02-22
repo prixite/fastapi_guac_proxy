@@ -6,6 +6,10 @@ import "./App.css";
 function App() {
   const client = useRef();
 
+  const disconnect = () => {
+    client.current.disconnect();
+  };
+
   const connect = () => {
     const hostname = document.getElementById("guacd-host").value;
     const port = document.getElementById("guacd-port").value;
@@ -107,6 +111,7 @@ function App() {
           </label>
         </div>
         <button onClick={connect}>Connect</button>
+        <button onClick={disconnect}>Disconnect</button>
       </div>
       <div id="display"></div>
     </>

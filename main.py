@@ -47,7 +47,7 @@ async def websocket_endpoint(
         guacd_port,
         {
             "protocol": protocol,
-            "size": [2560, 1600, 227],
+            "size": [1024, 768, 96],
             "audio": [],
             "video": [],
             "image": [],
@@ -58,6 +58,7 @@ async def websocket_endpoint(
                 "password": password,
             },
         },
+        debug=True,
     )
     await client.connect()
     await client.handshake()
