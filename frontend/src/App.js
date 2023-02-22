@@ -8,6 +8,7 @@ function App() {
 
   const disconnect = () => {
     client.current.disconnect();
+    document.getElementById("display").innerHTML = "";
   };
 
   const connect = () => {
@@ -25,6 +26,12 @@ function App() {
     document
       .getElementById("display")
       .appendChild(guac.getDisplay().getElement());
+
+    guac.onstatechange = (state) => {
+      if (state === 5) {
+        document.getElementById("display").innerHTML = "";
+      }
+    }
 
     guac.connect([
       `guacd_host=${hostname}`,
