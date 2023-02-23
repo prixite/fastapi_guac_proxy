@@ -29,7 +29,9 @@ class GuacamoleClient:
         logger.debug(f"Sending: {data}")
 
     async def read(self):
-        raw_instruction = await self.reader.readuntil(Instruction.INSTRUCTION_DELIMITER.encode())
+        raw_instruction = await self.reader.readuntil(
+            Instruction.INSTRUCTION_DELIMITER.encode()
+        )
         instruction = Instruction.from_string(raw_instruction.decode())
         logger.debug(f"Received: {instruction}")
         return instruction
