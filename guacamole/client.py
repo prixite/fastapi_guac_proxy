@@ -7,12 +7,10 @@ logger = logging
 
 class GuacamoleClient:
     VERSION = "VERSION_1_3_0"
-    READ_BUFFER_SIZE = 4096 * 2
 
     def __init__(self, host, port, config, debug=False):
         self.host = host
         self.port = port
-        self.buffer = ""
         self.client_version = ""
         self.config = config
         self.client_id = None
@@ -31,22 +29,15 @@ class GuacamoleClient:
         logger.debug(f"Sending: {data}")
 
     async def read(self):
-        index = self.buffer.find(Instruction.INSTRUCTION_DELIMITER)
-        while index == -1:
-            raw = await self.reader.read(self.READ_BUFFER_SIZE)
-            self.buffer += raw.decode()
-            index = self.buffer.find(Instruction.INSTRUCTION_DELIMITER)
-
-        raw_instruction = self.buffer[: index + 1]
-        assert raw_instruction[-1] == Instruction.INSTRUCTION_DELIMITER
-        instruction = Instruction.from_string(raw_instruction)
-        self.buffer = self.buffer[len(str(instruction)) :]
+        raw_instruction = await self.reader.readuntil(Instruction.INSTRUCTION_DELIMITER.encode())
+        instruction = Instruction.from_string(raw_instruction.decode())
         logger.debug(f"Received: {instruction}")
         return instruction
 
     async def close(self):
         self.writer.close()
         self.reader.feed_eof()
+        await self.writer.wait_closed()
         logger.info("Connection closed")
 
     async def send(self, instruction):

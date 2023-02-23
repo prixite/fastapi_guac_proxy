@@ -73,3 +73,5 @@ async def websocket_endpoint(
     except WebSocketDisconnect:
         task.cancel()
         await client.close()
+
+    await asyncio.wait([task])
