@@ -5,10 +5,17 @@ import "./App.css";
 
 function App() {
   const client = useRef();
+  const keyboard = useRef();
+  const mouse = useRef();
 
   const disconnect = () => {
     client.current.disconnect();
     document.getElementById("display").innerHTML = "";
+    keyboard.current.onkeydown = keyboard.current.onkeyup = null;
+    mouse.current.onmousedown =
+      mouse.current.onmouseup =
+      mouse.current.onmousemove =
+        null;
   };
 
   const connect = () => {
@@ -22,7 +29,7 @@ function App() {
     const tunnel = new Guacamole.WebSocketTunnel(
       "ws://localhost:8000/websocket/"
     );
-    const guac = client.current = new Guacamole.Client(tunnel);
+    const guac = (client.current = new Guacamole.Client(tunnel));
     document
       .getElementById("display")
       .appendChild(guac.getDisplay().getElement());
@@ -31,39 +38,42 @@ function App() {
       if (state === 5) {
         document.getElementById("display").innerHTML = "";
       }
-    }
+    };
 
-    guac.connect([
-      `guacd_host=${hostname}`,
-      `guacd_port=${port}`,
-      `protocol=${protocol}`,
-      `remote_host=${remoteHost}`,
-      `remote_port=${remotePort}`,
-      `username=${username}`,
-      `password=${password}`,
-    ].join("&"));
+    guac.connect(
+      [
+        `guacd_host=${hostname}`,
+        `guacd_port=${port}`,
+        `protocol=${protocol}`,
+        `remote_host=${remoteHost}`,
+        `remote_port=${remotePort}`,
+        `username=${username}`,
+        `password=${password}`,
+      ].join("&")
+    );
 
-    window.onunload = function() {
-      guac.disconnect();
-    }
+    window.onunload = function () {
+      disconnect();
+    };
 
     // Mouse
-    var mouse = new Guacamole.Mouse(guac.getDisplay().getElement());
+    mouse.current = new Guacamole.Mouse(guac.getDisplay().getElement());
 
-    mouse.onmousedown =
-      mouse.onmouseup   =
-      mouse.onmousemove = function(mouseState) {
-        guac.sendMouseState(mouseState);
-      };
+    mouse.current.onmousedown =
+      mouse.current.onmouseup =
+      mouse.current.onmousemove =
+        function (mouseState) {
+          guac.sendMouseState(mouseState);
+        };
 
     // Keyboard
-    var keyboard = new Guacamole.Keyboard(document);
+    keyboard.current = new Guacamole.Keyboard(document);
 
-    keyboard.onkeydown = function (keysym) {
+    keyboard.current.onkeydown = function (keysym) {
       guac.sendKeyEvent(1, keysym);
     };
 
-    keyboard.onkeyup = function (keysym) {
+    keyboard.current.onkeyup = function (keysym) {
       guac.sendKeyEvent(0, keysym);
     };
   };
@@ -74,7 +84,11 @@ function App() {
         <div>
           <label>
             Guacd Server Hostname:
-            <input id="guacd-host" type="text" defaultValue={"74.207.234.105"} />
+            <input
+              id="guacd-host"
+              type="text"
+              defaultValue={"74.207.234.105"}
+            />
           </label>
         </div>
         <div>

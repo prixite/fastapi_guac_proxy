@@ -7,7 +7,7 @@ logger = logging
 
 class GuacamoleClient:
     VERSION = "VERSION_1_3_0"
-    READ_BUFFER_SIZE = 4096
+    READ_BUFFER_SIZE = 4096 * 2
 
     def __init__(self, host, port, config, debug=False):
         self.host = host
